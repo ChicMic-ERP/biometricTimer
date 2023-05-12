@@ -1,0 +1,148 @@
+<html>
+  <head>
+    <title>Time Dragon</title>
+    <script>
+      let userToken = "", employeeId, password, myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+      function getCurrentDate() {
+        const date = new Date();
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        const formattedDate = `${year}-${month}-${day}`;
+        return formattedDate;
+      }
+      function refresh() {
+            myHeaders.append("authorization", userToken);
+            // myHeaders.append("Content-Type", "application/json");
+
+            var raw = JSON.stringify({
+              date: getCurrentDate(),
+              empId: employeeId.split("/")[2] || "135",
+            });
+            
+            var requestOptions = {
+              method: "POST",
+              headers: myHeaders,
+              body: raw,
+              redirect: "follow",
+            };
+        fetch(
+              "https://apigateway.erp.chicmic.in/v1/biometric/time-spent",
+              requestOptions
+            )
+              .then((response) => response.json())
+              .then((result) => {
+
+                runTimer(result.data.totalTimeInWorkZone);
+              })
+              .catch((error) => console.log("error", error));
+      }
+
+      function login() {
+         employeeId = document.getElementById("employeeId").value;
+         password = document.getElementById("password").value;
+        // console.log("Employee id ", employeeId.split("/")[2], password);
+        // let myHeaders = new Headers();
+        // myHeaders.append("Content-Type", "application/json");
+        let data = JSON.stringify({
+          loginId: employeeId,
+          password: password,
+        });
+
+        var requestOptions = {
+          method: "POST",
+          body: data,
+          headers: myHeaders,
+          redirect: "follow",
+        };
+        
+        fetch("https://apigateway.erp.chicmic.in/v1/auth/login", requestOptions)
+          .then((response) => response.json())
+          .then((result) => {
+            userToken = result.accessToken;
+            myHeaders.append("authorization", result.accessToken);
+            var raw = JSON.stringify({
+              date: getCurrentDate(),
+              empId: employeeId.split("/")[2] || "135",
+            });
+
+            var requestOptions = {
+              method: "POST",
+              headers: myHeaders,
+              body: raw,
+              redirect: "follow",
+            };
+
+            fetch(
+              "https://apigateway.erp.chicmic.in/v1/biometric/time-spent",
+              requestOptions
+            )
+              .then((response) => response.json())
+              .then((result) => {
+                document.getElementById("login").innerHTML = "";
+                runTimer(result.data.totalTimeInWorkZone);
+                document.getElementById("refresh").innerHTML =  '<button type="submit" onclick="refresh()">Refresh</button>';
+              })
+              .catch((error) => console.log("error", error));
+          })
+          .catch((error) => console.log("error", error));
+
+        function runTimer(time) {
+          let currentTime = new Date().setHours(
+            parseInt(time.substr(0, 2)),
+            parseInt(time.substr(3, 2)),
+            parseInt(time.substr(6, 2))
+          );
+
+          function updateTimer() {
+            currentTime += 1000; // Increase the current time by 1 second
+
+            const dateObj = new Date(currentTime);
+            const hours = dateObj.getHours();
+            const minutes = dateObj.getMinutes();
+            const seconds = dateObj.getSeconds();
+
+            const formattedTime = `${hours
+              .toString()
+              .padStart(2, "0")}:${minutes
+              .toString()
+              .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+           
+            document.getElementById("timer").innerHTML =
+              "Time spent: " + formattedTime;
+   
+          }
+
+          // Update the timer every second
+          setInterval(updateTimer, 1000);
+        }
+      }
+    </script>
+    <script src="renderer.js"></script>
+    <style link=""></style>
+  </head>
+
+  <body>
+    <div id="login">
+      <div class="login-box">
+        <input class="login-input"
+          id="employeeId"
+          type="text"
+          placeholder="Enter you employee id"
+          name="employeeId"
+        />
+        <input class="login-input"
+          id="password"
+          type="password"
+          placeholder="Enter you password"
+          name="password"
+        />
+        <button class="login-button" type="submit" onclick="login()">Login</button>
+      </div>
+    </div>
+    <div id="error"></div>
+    <div id="timer"></div>
+    <div id="refresh"></div>
+  </body>
+</html>

@@ -17,7 +17,6 @@ ipcRenderer.on('window-minimized', () => {
 
 ipcRenderer.on('window-restored', () => {
   if (observer) {
-    console.log('stop observing');
     observer.disconnect();
     observer = null;
   }

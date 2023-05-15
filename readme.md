@@ -29,10 +29,14 @@ npm run start
 ## Packaging
 
 # Pack for development
+```shell
 npm run pack
+```
 
 # Build for distribution
+```shell
 npm run dist
+```
 
 ## Steps to contribute to this project
 

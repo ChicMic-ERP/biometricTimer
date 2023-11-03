@@ -1,3 +1,8 @@
 .hidden {
     display: none;
 }
+.login-box .login-input, 
+.login-box .login-button {
+    display: block;
+    margin-bottom: 10px;
+}

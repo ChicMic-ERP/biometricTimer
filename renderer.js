@@ -1,4 +1,3 @@
-
 const { ipcRenderer } = require('electron');
 
 let timerElement = null;
@@ -11,7 +10,6 @@ ipcRenderer.on('window-minimized', () => {
     ipcRenderer.send('timer-value', timerValue);
   });
 
-  console.log('observing');
   observer.observe(timerElement, { childList: true, subtree: true, characterData: true });
 });
 
